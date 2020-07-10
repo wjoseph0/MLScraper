@@ -61,6 +61,8 @@ def api_property_list_for_sale(api_key, city, state, prop_type, limit=200):
   return response.json() # json format
 
 
+
+
 def api_property_details(api_key, property_id):
   url = "https://realtor.p.rapidapi.com/properties/v2/detail"
 
@@ -74,6 +76,8 @@ def api_property_details(api_key, property_id):
   response = requests.request("GET", url, headers=headers, params=querystring)
 
   return response.json() # json format
+
+
 
 
 def process_list_for_sale_response(response_json):
@@ -116,11 +120,13 @@ def process_list_for_sale_response(response_json):
 
 
 
-realtor_api_key = get_api_key() # api key to access data
 
+realtor_api_key = get_api_key() # api key to access data
 city = "Chicago"
 state = "IL"
 prop_type = "single-family"
+
+
 
 
 property_list_for_sale_response = api_property_list_for_sale(api_key=realtor_api_key, 
@@ -132,4 +138,5 @@ property_list_for_sale_response = api_property_list_for_sale(api_key=realtor_api
 
 df_properties_for_sale_raw = process_list_for_sale_response(response_json=property_list_for_sale_response)
 df_properties_for_sale_raw.head()
+
 print(df_properties_for_sale_raw.head())
