@@ -68,7 +68,7 @@ def api_property_list_for_sale(api_key, sqft_min, postal_code, prop_type, limit)
 
 
 
-def api_property_details(api_key, property_id):
+
   url = "https://realtor.p.rapidapi.com/properties/v2/detail"
 
   querystring = {"property_id":property_id}
