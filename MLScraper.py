@@ -27,8 +27,8 @@ def get_api_key():
   dotenv_path = join(dirname(__file__), 'settings.env')
   load_dotenv(dotenv_path)
 
-  # return api key if in dataset
-  # get api key from id
+
+  # get api key
   api_key = os.getenv("api_key")
   # return api key
   return api_key
