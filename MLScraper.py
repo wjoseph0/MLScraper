@@ -8,6 +8,7 @@ import pygsheets
 
 
 
+
 def get_api_key():
   """
   Get the api key for website accessing.
@@ -68,23 +69,6 @@ def api_property_list_for_sale(api_key, sqft_min, postal_code, prop_type, limit)
 
 
 
-
-  url = "https://realtor.p.rapidapi.com/properties/v2/detail"
-
-  querystring = {"property_id":property_id}
-
-  headers = {
-    'x-rapidapi-host': "realtor.p.rapidapi.com",
-    'x-rapidapi-key': api_key
-    }
-
-  response = requests.request("GET", url, headers=headers, params=querystring)
-
-  return response.json() # json format
-
-
-
-
 def process_list_for_sale_response(response_json):
     """
     Process the list for sale API response.
@@ -134,13 +118,15 @@ limit = 1
 
 
 
+
 property_list_for_sale_response = api_property_list_for_sale(api_key=realtor_api_key, sqft_min= sqft_min, postal_code=postal_code,
                                                              prop_type=prop_type,
                                                              limit=limit)
-
-
 df_properties_for_sale_raw = process_list_for_sale_response(response_json=property_list_for_sale_response)
 df_properties_for_sale_raw.head(5)
+
+
+
 
 client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
 print("-----------------Authorized--------------------")
