@@ -152,10 +152,11 @@ group_spacing = 2
 include_comparables = 1
 
 for row in df_buy_list.itertuples() :
+  
   df_analyzed_list = pd.DataFrame()
 
-  buyable_property = {'Property ID':row.property_id, 'Web URL':row.rdc_web_url, 'Building SQFT':row.building_size}
-  df_analyzed_list = df_analyzed_list.append(buyable_property, ignore_index=True)
+  buyable_property = {'Property ID':row.property_id, 'Web URL':row.rdc_web_url, 'SQFT Building':row.building_size}
+  df_analyzed_list = df_analyzed_list.append(buyable_property, ignore_index = True)
 
 
   #get buyable building size
@@ -168,19 +169,23 @@ for row in df_buy_list.itertuples() :
   for row in df_compare_list.itertuples() :
     if 'dict' in str(type(row.building_size)) :
       for key, value in row.building_size.items() :
+
         if key == 'size':
           compared_building_size = value
-      if buyable_building_size - compared_building_size <= 500 and buyable_building_size - compared_building_size >= -500:
-        comparable_property = {'Property ID':row.property_id, 'Web URL':row.rdc_web_url, 'Building SQFT':row.building_size}
-        df_analyzed_list = df_analyzed_list.append(comparable_property, ignore_index=True)
+
+      if buyable_building_size - compared_building_size <= 500 and buyable_building_size - compared_building_size >= -500 and 2 == 2 and 2 ==2 and 2 == 2:
+
+        comparable_property = {'Property ID':row.property_id, 'Web URL':row.rdc_web_url, 'SQFT Building':row.building_size}
+        df_analyzed_list = df_analyzed_list.append(comparable_property, ignore_index = True)
         include_comparables = include_comparables + 1
+
     else:
       continue    
       
  
   post_to_comparables_tab(group_spacing)
   del df_analyzed_list
-  group_spacing = 2 + include_comparables
+  group_spacing = 3 + include_comparables
 
 
 
