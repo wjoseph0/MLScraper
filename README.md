@@ -1,2 +1,2 @@
 # MLScraper
-Pulls in real estate listings using the Realtor API
+Pulls in and sorts real estate listings using Realtor API
