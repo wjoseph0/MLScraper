@@ -7,7 +7,9 @@ import os
 from os.path import abspath, join, dirname
 import pygsheets
 from geopy.distance import great_circle
-
+import time
+import datetime
+from datetime import date
 
 
 
@@ -86,7 +88,7 @@ def post_to_sheets():
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('SubletInn MLScraper')
+  sheet = client.open('MLScraper ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   fullList_wks = sheet[2]
@@ -103,7 +105,7 @@ def post_to_opportunity_tab(spacer):
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('SubletInn MLScraper')
+  sheet = client.open('MLScraper ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   opporList_wks = sheet[0]
@@ -116,7 +118,7 @@ def post_to_comparables_tab(group_spacing):
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('SubletInn MLScraper')
+  sheet = client.open('MLScraper ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   analyzedList_wks = sheet[1]
@@ -156,8 +158,8 @@ def is_opportunity():
 #---------------------------------------------------------------------------------------------------------------------------
 
 
-
-
+now = datetime.datetime.now()
+todaysDate = str(now.month) + '/' + str(now.day) + '/' + str(now.year)
 realtor_api_key = get_realtor_api_key() # api key to access data
 prop_type = "single_family"
 postal_code = "60647" #Searches Logan Square, Chicago
