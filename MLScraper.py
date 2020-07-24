@@ -88,7 +88,7 @@ def post_to_sheets():
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('MLScraper ' + todaysDate)
+  sheet = client.open('MLS ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   fullList_wks = sheet[2]
@@ -102,10 +102,11 @@ def post_to_sheets():
   print("-----------------Data Updated------------------")
 
 def post_to_opportunity_tab(spacer):
+
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('MLScraper ' + todaysDate)
+  sheet = client.open('MLS ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   opporList_wks = sheet[0]
@@ -114,11 +115,26 @@ def post_to_opportunity_tab(spacer):
   opporList_wks.set_dataframe(df_opportunity_list,(spacer,1))
   print("-----------------Data Updated------------------")
 
+
+def post_to_neighbor_tab(neighbor_spacing):
+  client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
+  print("-----------------Authorized--------------------")
+
+  sheet = client.open('MLS ' + todaysDate)
+  print("-----------------Sheet Opened------------------")
+
+  opporList_wks = sheet[5]
+  print("-----------------Opportunity Tab Accessed----------")
+
+  opporList_wks.set_dataframe(df_neighbor_list,(neighbor_spacing,1))
+  print("-----------------Data Updated------------------")
+
+
 def post_to_comparables_tab(group_spacing):
   client = pygsheets.authorize(service_file='Realtor-viz-data-b5a9fbcd94bf.json')
   print("-----------------Authorized--------------------")
 
-  sheet = client.open('MLScraper ' + todaysDate)
+  sheet = client.open('MLS ' + todaysDate)
   print("-----------------Sheet Opened------------------")
 
   analyzedList_wks = sheet[1]
@@ -174,10 +190,10 @@ df_properties_for_sale_raw = process_list_for_sale_response(response_json=proper
 
 
 df_buy_list = pd.DataFrame() #empty dataframe to be used
-df_buy_list = pd.concat([df_buy_list, df_properties_for_sale_raw[df_properties_for_sale_raw['price'] <= 300000]])
+df_buy_list = pd.concat([df_buy_list, df_properties_for_sale_raw[df_properties_for_sale_raw['price'] <= 300000 ]])
 
 df_compare_list = pd.DataFrame()
-df_compare_list = pd.concat([df_compare_list, df_properties_for_sale_raw[df_properties_for_sale_raw['price'] > 300000]])
+df_compare_list = pd.concat([df_compare_list, df_properties_for_sale_raw[df_properties_for_sale_raw['price'] > 300000 ]])
 
 
 print('Number of listings found: ', df_properties_for_sale_raw['property_id'].count())
@@ -194,13 +210,14 @@ post_to_sheets()
 
 
 group_spacing = 2
+neighbor_spacing = 1
 include_comparables = 1
 spacer = 1
 
 for buyable_row in df_buy_list.itertuples() :
   
   df_analyzed_list = pd.DataFrame()
-
+  df_neighbor_list = pd.DataFrame()
 
   #GET buyable building size
   if 'dict' in str(type(buyable_row.building_size))  : #only compares if the field isn't blank
@@ -224,6 +241,7 @@ for buyable_row in df_buy_list.itertuples() :
         buyable_property = {'a_Property ID':buyable_row.property_id, 'b_Web URL':buyable_row.rdc_web_url, 'c_Price':buyable_row.price, 
           'd_Building SQFT':buyable_row.building_size, 'e_Lot SQFT':buyable_row.lot_size, 'f_Bedrooms':buyable_row.beds, 'g_Bathrooms':buyable_row.baths}
         df_analyzed_list = df_analyzed_list.append(buyable_property, ignore_index = True)
+        df_neighbor_list = df_neighbor_list.append(buyable_property, ignore_index = True)
         buyable_beds = buyable_row.beds
         buyable_baths = buyable_row.baths
         buyable_price = buyable_row.price
@@ -234,7 +252,30 @@ for buyable_row in df_buy_list.itertuples() :
   else:
     continue
 
-  
+    # Group neighbored properties
+  include_neighbors = 2
+  for row in df_properties_for_sale_raw.itertuples() :
+    if str(buyable_row.property_id) not in str(row.property_id):
+
+      if 'dict' in str(type(row.address))  : #only compares if the field isn't blank
+        for key, value in row.address.items() :
+          if key == 'lat':
+            compared_lat = value # store latitude in a variable
+          if key == 'lon':
+            compared_lon = value # store longitude in a variable
+            
+        compared_address = (compared_lat, compared_lon)
+      else:
+        continue
+
+      if great_circle(buyable_address, compared_address).miles <= 1:
+        neighbor_property = {'a_Property ID':row.property_id, 'b_Web URL':row.rdc_web_url, 'c_Price':row.price, 
+        'd_Building SQFT':row.building_size, 'e_Lot SQFT':row.lot_size, 'f_Bedrooms':row.beds, 'g_Bathrooms':row.baths}
+        df_neighbor_list = df_neighbor_list.append(neighbor_property, ignore_index = True)
+        include_neighbors = include_neighbors + 1
+      else:
+        continue
+
 
 
   opportunity_upload = 0
@@ -299,13 +340,16 @@ for buyable_row in df_buy_list.itertuples() :
     else:
       continue
 
-  
+
 
 
 # Push grouped listings up to the google sheet and start the process over again
+  post_to_neighbor_tab(neighbor_spacing)
   post_to_comparables_tab(group_spacing)
+  del df_neighbor_list
   del df_analyzed_list
   group_spacing = 3 + include_comparables
+  neighbor_spacing = 3 + include_neighbors
 
 
 
